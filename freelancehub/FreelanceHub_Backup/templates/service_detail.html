@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}{{ service.title }} - FreelanceHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Service Details -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="category-badge">{{ service.category }}</span>
+                            <h1 class="fw-bold mt-2">{{ service.title }}</h1>
+                        </div>
+                        <div class="text-end">
+                            <div class="price-tag fs-4">${{ "%.0f"|format(service.price) }}</div>
+                            <small class="text-muted">Fixed Price</small>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="d-flex align-items-center me-4">
+                            <i class="fas fa-user text-primary me-2"></i>
+                            <span>{{ service.freelancer.username }}</span>
+                        </div>
+                        <div class="d-flex align-items-center me-4">
+                            <i class="fas fa-clock text-primary me-2"></i>
+                            <span>{{ service.delivery_time }} days delivery</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-calendar text-primary me-2"></i>
+                            <span>{{ service.created_at.strftime('%b %d, %Y') }}</span>
+                        </div>
+                    </div>
+                    
+                    <h5>Description</h5>
+                    <p class="text-muted">{{ service.description }}</p>
+                </div>
+            </div>
+            
+            <!-- Freelancer Info -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">About the Freelancer</h5>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                             style="width: 50px; height: 50px;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">{{ service.freelancer.username }}</h6>
+                            <small class="text-muted">
+                                {% if service.freelancer.is_freelancer %}
+                                    <i class="fas fa-briefcase me-1"></i>Freelancer
+                                {% else %}
+                                    <i class="fas fa-user me-1"></i>Member
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    
+                    {% if service.freelancer.bio %}
+                        <p class="text-muted">{{ service.freelancer.bio }}</p>
+                    {% else %}
+                        <p class="text-muted">No bio available.</p>
+                    {% endif %}
+                    
+                    {% if service.freelancer.skills %}
+                        <div class="mb-3">
+                            <h6>Skills</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for skill in service.freelancer.skills.split(',') %}
+                                    <span class="badge bg-light text-dark">{{ skill.strip() }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if service.freelancer.hourly_rate %}
+                        <div>
+                            <h6>Hourly Rate</h6>
+                            <span class="text-primary fw-bold">${{ "%.0f"|format(service.freelancer.hourly_rate) }}/hour</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Order Section -->
+        <div class="col-lg-4">
+            <div class="card sticky-top" style="top: 2rem;">
+                <div class="card-body">
+                    <h5 class="card-title">Order Summary</h5>
+                    
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Service Price</span>
+                        <span class="fw-bold">${{ "%.0f"|format(service.price) }}</span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Platform Fee</span>
+                        <span class="text-muted">$0</span>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="fw-bold">Total</span>
+                        <span class="fw-bold fs-5">${{ "%.0f"|format(service.price) }}</span>
+                    </div>
+                    
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.id != service.freelancer_id %}
+                            <a href="{{ url_for('create_order', service_id=service.id) }}" 
+                               class="btn btn-primary w-100 mb-3">
+                                <i class="fas fa-shopping-cart me-2"></i>Place Order
+                            </a>
+                        {% else %}
+                            <button class="btn btn-secondary w-100 mb-3" disabled>
+                                <i class="fas fa-user me-2"></i>Your Own Service
+                            </button>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="btn btn-primary w-100 mb-3">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login to Order
+                        </a>
+                    {% endif %}
+                    
+                    <div class="text-center">
+                        <small class="text-muted">
+                            <i class="fas fa-shield-alt me-1"></i>
+                            Secure payment • 100% satisfaction guarantee
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Related Services -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="mb-4">More Services from {{ service.freelancer.username }}</h3>
+            <div class="row g-4">
+                {% for related_service in service.freelancer.services[:3] %}
+                    {% if related_service.id != service.id and related_service.is_active %}
+                    <div class="col-md-4">
+                        <div class="card service-card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <span class="category-badge">{{ related_service.category }}</span>
+                                    <span class="price-tag">${{ "%.0f"|format(related_service.price) }}</span>
+                                </div>
+                                <h6 class="card-title">{{ related_service.title }}</h6>
+                                <p class="card-text text-muted small">
+                                    {{ related_service.description[:100] }}{% if related_service.description|length > 100 %}...{% endif %}
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>{{ related_service.delivery_time }} days
+                                    </small>
+                                    <a href="{{ url_for('service_detail', service_id=related_service.id) }}" 
+                                       class="btn btn-outline-primary btn-sm">View</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

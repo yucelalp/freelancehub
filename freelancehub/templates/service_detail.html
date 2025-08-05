@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}{{ service.title }} - FreelanceHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Service Details -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h2 class="fw-bold mb-2">{{ service.title }}</h2>
+                            <p class="text-muted mb-0">
+                                by <a href="#" class="text-decoration-none">{{ service.freelancer.username }}</a>
+                            </p>
+                        </div>
+                        <div class="text-end">
+                            <div class="price-tag fs-4">${{ "%.0f"|format(service.price) }}</div>
+                            <small class="text-muted">Delivery in {{ service.delivery_time }} days</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <span class="category-badge">{{ service.category }}</span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Description</h5>
+                        <p class="text-muted">{{ service.description }}</p>
+                    </div>
+                    
+                    <div class="d-flex gap-3">
+                        {% if current_user.is_authenticated and not current_user.is_freelancer %}
+                            <a href="{{ url_for('create_order', service_id=service.id) }}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-shopping-cart me-2"></i>Order Now
+                            </a>
+                        {% elif not current_user.is_authenticated %}
+                            <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login to Order
+                            </a>
+                        {% endif %}
+                        <button class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-heart me-2"></i>Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat Section (if user is authenticated and has orders with this service) -->
+            {% if current_user.is_authenticated %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-comments me-2"></i>Chat with {{ service.freelancer.username }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="chat-messages" class="border rounded p-3 mb-3" style="height: 300px; overflow-y: auto;">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-comments fa-2x mb-2"></i>
+                                <p>Start a conversation about this service</p>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="chat-input" placeholder="Type your message...">
+                            <button class="btn btn-primary" id="send-message">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Freelancer Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user me-2"></i>About the Freelancer
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                             style="width: 50px; height: 50px;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1">{{ service.freelancer.username }}</h6>
+                            <small class="text-muted">Member since {{ service.freelancer.created_at.strftime('%B %Y') }}</small>
+                        </div>
+                    </div>
+                    
+                    {% if service.freelancer.bio %}
+                        <p class="text-muted small">{{ service.freelancer.bio }}</p>
+                    {% endif %}
+                    
+                    {% if service.freelancer.skills %}
+                        <div class="mb-3">
+                            <small class="text-muted">Skills:</small>
+                            <div class="mt-1">
+                                {% for skill in service.freelancer.skills.split(',') %}
+                                    <span class="badge bg-light text-dark me-1">{{ skill.strip() }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if service.freelancer.hourly_rate %}
+                        <div class="mb-3">
+                            <small class="text-muted">Hourly Rate:</small>
+                            <div class="fw-bold">${{ "%.0f"|format(service.freelancer.hourly_rate) }}/hour</div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Service Details -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Service Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <small class="text-muted">Category</small>
+                            <div class="fw-bold">{{ service.category }}</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Delivery Time</small>
+                            <div class="fw-bold">{{ service.delivery_time }} days</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Price</small>
+                            <div class="fw-bold text-primary">${{ "%.0f"|format(service.price) }}</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Created</small>
+                            <div class="fw-bold">{{ service.created_at.strftime('%b %d, %Y') }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Similar Services -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-th-large me-2"></i>Similar Services
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-search fa-2x mb-2"></i>
+                        <p>More services coming soon...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chat JavaScript -->
+{% if current_user.is_authenticated %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const sendButton = document.getElementById('send-message');
+    
+    function sendMessage() {
+        const message = chatInput.value.trim();
+        if (message) {
+            // Add message to chat
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message sent mb-2';
+            messageElement.innerHTML = `
+                <div class="d-flex justify-content-end">
+                    <div class="bg-primary text-white rounded p-2" style="max-width: 70%;">
+                        <small class="d-block text-white-50">You</small>
+                        <div>${message}</div>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(messageElement);
+            
+            // Clear input
+            chatInput.value = '';
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Emit message via Socket.IO
+            if (window.socket) {
+                window.socket.emit('send_message', {
+                    order_id: {{ service.id }}, // Using service ID as order ID for demo
+                    message: message
+                });
+            }
+        }
+    }
+    
+    sendButton.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+    
+    // Listen for incoming messages
+    if (window.socket) {
+        window.socket.on('new_message', function(data) {
+            if (data.user_id !== {{ current_user.id }}) {
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message received mb-2';
+                messageElement.innerHTML = `
+                    <div class="d-flex justify-content-start">
+                        <div class="bg-light rounded p-2" style="max-width: 70%;">
+                            <small class="d-block text-muted">${data.username}</small>
+                            <div>${data.message}</div>
+                        </div>
+                    </div>
+                `;
+                chatMessages.appendChild(messageElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        });
+    }
+});
+</script>
+{% endif %}
+{% endblock %} 

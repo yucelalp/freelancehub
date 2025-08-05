@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - FreelanceHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Profile Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center">
+                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-4" 
+                     style="width: 80px; height: 80px;">
+                    <i class="fas fa-user fa-2x"></i>
+                </div>
+                <div>
+                    <h2 class="fw-bold mb-1">{{ current_user.username }}</h2>
+                    <p class="text-muted mb-2">
+                        {% if current_user.is_freelancer %}
+                            <i class="fas fa-briefcase me-1"></i>Freelancer
+                        {% else %}
+                            <i class="fas fa-user me-1"></i>Client
+                        {% endif %}
+                        • Member since {{ current_user.created_at.strftime('%B %Y') }}
+                    </p>
+                    {% if current_user.bio %}
+                        <p class="text-muted mb-0">{{ current_user.bio }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="#" class="btn btn-outline-primary">
+                <i class="fas fa-edit me-2"></i>Edit Profile
+            </a>
+        </div>
+    </div>
+    
+    <!-- Dashboard Stats -->
+    <div class="row mb-4">
+        {% if current_user.is_freelancer %}
+            <div class="col-md-3 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-primary fw-bold">{{ current_user.services|length }}</h3>
+                        <p class="text-muted mb-0">Active Services</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-success fw-bold">0</h3>
+                        <p class="text-muted mb-0">Completed Orders</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-warning fw-bold">0</h3>
+                        <p class="text-muted mb-0">Pending Orders</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-info fw-bold">$0</h3>
+                        <p class="text-muted mb-0">Total Earnings</p>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-md-3 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-primary fw-bold">{{ current_user.orders|length }}</h3>
+                        <p class="text-muted mb-0">Total Orders</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-success fw-bold">0</h3>
+                        <p class="text-muted mb-0">Completed</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-warning fw-bold">0</h3>
+                        <p class="text-muted mb-0">In Progress</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-info fw-bold">$0</h3>
+                        <p class="text-muted mb-0">Total Spent</p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Main Content -->
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            {% if current_user.is_freelancer %}
+                <!-- My Services -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-briefcase me-2"></i>My Services
+                        </h5>
+                        <a href="{{ url_for('create_service') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i>Create Service
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% if current_user.services %}
+                            <div class="row g-3">
+                                {% for service in current_user.services %}
+                                <div class="col-md-6">
+                                    <div class="card border">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <span class="category-badge">{{ service.category }}</span>
+                                                <span class="price-tag">${{ "%.0f"|format(service.price) }}</span>
+                                            </div>
+                                            <h6 class="card-title">{{ service.title }}</h6>
+                                            <p class="card-text text-muted small">
+                                                {{ service.description[:100] }}{% if service.description|length > 100 %}...{% endif %}
+                                            </p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-clock me-1"></i>{{ service.delivery_time }} days
+                                                </small>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ url_for('service_detail', service_id=service.id) }}" 
+                                                       class="btn btn-outline-primary">View</a>
+                                                    <button class="btn btn-outline-secondary">Edit</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-briefcase fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No services yet</h5>
+                                <p class="text-muted">Create your first service to start earning</p>
+                                <a href="{{ url_for('create_service') }}" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>Create Your First Service
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% else %}
+                <!-- My Orders -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-shopping-cart me-2"></i>My Orders
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if current_user.orders %}
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Service</th>
+                                            <th>Freelancer</th>
+                                            <th>Price</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for order in current_user.orders %}
+                                        <tr>
+                                            <td>{{ order.service.title }}</td>
+                                            <td>{{ order.service.freelancer.username }}</td>
+                                            <td>${{ "%.0f"|format(order.total_amount) }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ 'success' if order.status == 'completed' else 'warning' if order.status == 'in_progress' else 'secondary' }}">
+                                                    {{ order.status.replace('_', ' ').title() }}
+                                                </span>
+                                            </td>
+                                            <td>{{ order.created_at.strftime('%b %d, %Y') }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary">View</button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No orders yet</h5>
+                                <p class="text-muted">Start browsing services to place your first order</p>
+                                <a href="{{ url_for('services') }}" class="btn btn-primary">
+                                    <i class="fas fa-search me-2"></i>Browse Services
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- Profile Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user me-2"></i>Profile Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Username</label>
+                        <p class="text-muted mb-0">{{ current_user.username }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Email</label>
+                        <p class="text-muted mb-0">{{ current_user.email }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Account Type</label>
+                        <p class="text-muted mb-0">
+                            {% if current_user.is_freelancer %}
+                                <i class="fas fa-briefcase me-1"></i>Freelancer
+                            {% else %}
+                                <i class="fas fa-user me-1"></i>Client
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% if current_user.hourly_rate %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Hourly Rate</label>
+                        <p class="text-muted mb-0">${{ "%.0f"|format(current_user.hourly_rate) }}/hour</p>
+                    </div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Member Since</label>
+                        <p class="text-muted mb-0">{{ current_user.created_at.strftime('%B %d, %Y') }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if current_user.is_freelancer %}
+                            <a href="{{ url_for('create_service') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Create Service
+                            </a>
+                            <a href="{{ url_for('services') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-search me-2"></i>Browse Services
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('services') }}" class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>Browse Services
+                            </a>
+                            <a href="#" class="btn btn-outline-primary">
+                                <i class="fas fa-user-plus me-2"></i>Become a Freelancer
+                            </a>
+                        {% endif %}
+                        <a href="#" class="btn btn-outline-secondary">
+                            <i class="fas fa-cog me-2"></i>Settings
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
