@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Successful - FreelanceHub{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white text-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Payment Successful!
+                    </h4>
+                </div>
+                <div class="card-body p-4 text-center">
+                    <!-- Success Icon -->
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                    </div>
+
+                    <!-- Success Message -->
+                    <h5 class="text-success mb-3">Payment Completed Successfully!</h5>
+                    <p class="text-muted mb-4">Your order has been confirmed and the freelancer has been notified.</p>
+
+                    <!-- Order Details -->
+                    <div class="alert alert-info mb-4">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-receipt me-2"></i>
+                            Order Details
+                        </h6>
+                        <div class="row text-start">
+                            <div class="col-md-6">
+                                <strong>Order ID:</strong> #{{ order.id }}<br>
+                                <strong>Service:</strong> {{ order.service.title }}<br>
+                                <strong>Freelancer:</strong> {{ order.service.freelancer.username }}<br>
+                                <strong>Status:</strong> 
+                                <span class="badge bg-success">Paid</span>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <strong>Amount Paid:</strong><br>
+                                <span class="h5 text-primary">${{ "%.2f"|format(payment.amount) }}</span><br>
+                                <small class="text-muted">Transaction: {{ payment.transaction_id[:8] }}...</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Next Steps -->
+                    <div class="alert alert-light mb-4">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-info-circle me-2"></i>
+                            What's Next?
+                        </h6>
+                        <ul class="list-unstyled mb-0">
+                            <li><i class="fas fa-bell me-2 text-primary"></i>You'll receive notifications about your order progress</li>
+                            <li><i class="fas fa-comments me-2 text-primary"></i>Chat with the freelancer about your project</li>
+                            <li><i class="fas fa-clock me-2 text-primary"></i>Track delivery progress in your profile</li>
+                        </ul>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('profile') }}" class="btn btn-primary">
+                            <i class="fas fa-user me-2"></i>
+                            Go to My Profile
+                        </a>
+                        <a href="{{ url_for('services') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-search me-2"></i>
+                            Browse More Services
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Animation -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add a small delay to show the success animation
+    setTimeout(function() {
+        const successIcon = document.querySelector('.fas.fa-check-circle');
+        successIcon.style.animation = 'bounce 0.6s ease-in-out';
+    }, 100);
+});
+</script>
+
+<style>
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+</style>
+{% endblock %} 
