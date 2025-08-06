@@ -1,8 +1,14 @@
 [phases.setup]
-aptPkgs = ["python3-dev", "build-essential"]
+aptPkgs = ["python3-dev", "build-essential", "python3-pip", "python3-venv", "libpq-dev"]
 
 [phases.install]
-cmds = ["pip install --upgrade pip", "pip install -r requirements.txt"]
+cmds = ["python -m pip install --upgrade pip", "python -m pip install wheel", "python -m pip install -r requirements.txt"]
 
 [start]
 cmd = "gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 1"
+
+[phases]
+providers = ["python"]
+
+[variables]
+PYTHON_VERSION = "3.9.16"
